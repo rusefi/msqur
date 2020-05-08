@@ -28,7 +28,14 @@ Secondary:
 
 black text on all except dark
 */
-body, button {
+body {
+	font-family: "Verdana", sans-serif;
+	padding-bottom: 120px;
+	height: 100%;
+	position: relative;
+}
+
+button {
 	font-family: "Verdana", sans-serif;
 }
 

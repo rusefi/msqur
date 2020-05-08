@@ -30,8 +30,9 @@ black text on all except dark
 */
 body {
 	font-family: "Verdana", sans-serif;
-	padding-bottom: 120px;
-	height: 100%;
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
 	position: relative;
 }
 
@@ -67,6 +68,7 @@ div#navigation {
 }
 
 span.logged {
+
 	float: right;
 	color: #e4e4e4;
 	margin-top: 10px;
@@ -283,6 +285,10 @@ aside {
 	display: inline-block;
 }
 
+.browse {
+	padding: 20px;
+}
+
 #processing {
 	color: darkorange;
 }
@@ -291,6 +297,14 @@ aside {
 	background: #dbe5ea;
 	padding: 8px 24px 8px 24px;
 	margin-bottom: 1em;
+}
+
+#content, #tabList {
+	padding-bottom: 120px;
+}
+
+#content table {
+	margin-top: 10px;
 }
 
 footer {

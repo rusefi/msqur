@@ -47,7 +47,7 @@ function parseQueryString($s)
 		
 		if (!is_array($ret))
 		{
-			$ret = htmlspecialchars($ret);
+			$ret = htmlspecialchars($ret, ENT_COMPAT);
 			if (strlen($ret) == 0) $ret = null;
 		}
 	}

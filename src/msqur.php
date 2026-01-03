@@ -57,7 +57,7 @@ class Msqur
 			//echo 'Adding ' . $file['tmp_name'];
 			//TODO if -1 failed
 			$id = $this->db->addMSQ($file, $engineid);
-			$fileList[$id] = htmlspecialchars($file['name']);
+			$fileList[$id] = htmlspecialchars($file['name'], ENT_COMPAT);
 		}
 		
 		return $fileList;
@@ -68,7 +68,7 @@ class Msqur
 		//echo 'Adding ' . $file['tmp_name'];
 		$id = $this->db->addLog($file, $user_id, $tune_id, $error);
 		if ($id > 0)
-			$fileList[$id] = htmlspecialchars($file['name']);
+			$fileList[$id] = htmlspecialchars($file['name'], ENT_COMPAT);
 		else
 			$fileList = null;
 		return $fileList;

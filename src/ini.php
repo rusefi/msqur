@@ -5,7 +5,7 @@
 class MSQ_ParseException extends Exception {
 	protected $htmlMessage;
 
-	public function __construct($message = null, $html = '', $code = 0, Exception $previous = null) {
+	public function __construct($message = null, $html = '', $code = 0, ?Exception $previous = null) {
 		parent::__construct($message, $code, $previous);
 		$this->htmlMessage = $html;
 	}
@@ -207,7 +207,7 @@ class INI
 			switch ($currentSection)
 			{
 				case "Constants": //The start of our journey. Fill in details about variables.
-					$values[$currentSection][$key] = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+					$values[$currentSection][$key] = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 					break;
 				
 				case "SettingContextHelp": //Any help text for our variable
@@ -215,7 +215,7 @@ class INI
 					break;
 				
 				case "Menu":
-					$menu = INI::defaultSectionHandler($value, true, $msq, $defines, $outputs);
+					$menu = INI::defaultSectionHandler($value, $msq, $defines, $outputs, true);
 					if (is_array($menu)) {
 						if ($condition !== NULL) {
 							$menu[count($menu) - 1] = $condition;
@@ -234,7 +234,7 @@ class INI
 				case "UserDefined":
 					if ($key == "dialog")
 					{
-						$curDialog = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+						$curDialog = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 						if (!is_array($curDialog))
 							$curDialog = array($curDialog);
 					} else if ($key == "indicatorPanel") {
@@ -243,7 +243,7 @@ class INI
 
 					if (is_array($curDialog))
 					{
-						$dlg = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+						$dlg = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 						if (is_array($dlg)) {
 							if ($condition !== NULL) {
 								foreach ($dlg as &$d) {
@@ -396,14 +396,14 @@ class INI
 					break;
 				
 				case "OutputChannels": //These are for gauges and datalogging
-					$v = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+					$v = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 					// here we store only computable outputs with expressions
 					if (isset($v[0]) && strpos($v[0], '{') !== FALSE && $condition !== NULL) {
 						$outputs["outputs"][$key] = $condition;
 					}
 					break;
 				case "SettingGroups": //misc settings
-					$values = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+					$values = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 					if ($key == "settingGroup") {
 						$curSettingGroup = isset($settings[$key]) ? count($settings[$key]) : 0;
 						// this will be the options list
@@ -418,7 +418,7 @@ class INI
 
 					break;
 				case "PcVariables":
-					$values[$currentSection][$key] = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+					$values[$currentSection][$key] = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 					break;
 				//Don't care about these
 				case "Datalog": //Not relevant
@@ -438,7 +438,7 @@ class INI
 				case NULL:
 					//Should be global values (don't think any ini's have them)
 					assert($currentSection === NULL);
-					$globals[$key] = INI::defaultSectionHandler($value, false, $msq, $defines, $outputs);
+					$globals[$key] = INI::defaultSectionHandler($value, $defines, $outputs, false);
 				break;
 			}
 		}
@@ -452,7 +452,7 @@ class INI
 	 * @param $value
 	 * @returns An array if there's a comma, or just the value.
 	 */
-	private static function defaultSectionHandler($value, $isLessStrict = false, $msq, $defines, $outputs)
+	private static function defaultSectionHandler($value, $defines, $outputs, $isLessStrict = false)
 	{
 		if (strpos($value, '$') !== 0) {
 			$value = preg_replace_callback('/\$(\w+)/', function ($m) use($defines) {

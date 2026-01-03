@@ -196,7 +196,7 @@ if ($action == "delete")
 function printTuneComment($c, $isTooltip)
 {
 	// decode from xml format
-	$c = html_entity_decode($c);
+	$c = html_entity_decode($c, ENT_COMPAT);
 	// compact to 1 line
 	if (!$isTooltip) {
 		$c = preg_replace("/\s+/", " ", $c);
@@ -206,7 +206,7 @@ function printTuneComment($c, $isTooltip)
 	$limit = 32;
 	$isTooLong = strlen($c) > $limit;
 	// protect from injecting html tags etc.
-	$c = htmlentities($c);
+	$c = htmlentities($c, ENT_COMPAT);
 	// preserve newlines for extended tooltip version
 	if ($isTooltip) {
 		$c = preg_replace("/[\r\n+]/", "<br/>", $c);

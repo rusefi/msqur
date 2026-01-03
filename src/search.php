@@ -23,7 +23,7 @@ require "view/search.php";
 
 if (isset($_GET['query']))
 {
-	$query = htmlspecialchars($_GET['query']);
+	$query = htmlspecialchars($_GET['query'], ENT_COMPAT);
 	//TODO Just use browse code
 	$results = $msqur->search($query);
 	$numResults = count($results);

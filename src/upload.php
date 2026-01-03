@@ -254,9 +254,9 @@ if ($isEmbedded || (isset($_POST['upload']) && isset($_FILES)))
 			);
 			$fileList = $msqur->addMSQs($files, $engineid);
 		
-			$safeName = htmlspecialchars($vars['name']);
-			$safeMake = htmlspecialchars($vars['make']);
-			$safeCode = htmlspecialchars($vars['code']);
+			$safeName = htmlspecialchars($vars['name'], ENT_COMPAT);
+			$safeMake = htmlspecialchars($vars['make'], ENT_COMPAT);
+			$safeCode = htmlspecialchars($vars['code'], ENT_COMPAT);
 		
 			addOutput('info', 'The tune file has been uploaded!');
 			

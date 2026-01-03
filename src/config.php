@@ -18,9 +18,7 @@ ini_set('log_errors', '1');
 //MSQUR-1
 //date_default_timezone_set('UTC');
 
-assert_options(ASSERT_ACTIVE, DEBUG ? 1 : 0);
-assert_options(ASSERT_WARNING, 0);
-assert_options(ASSERT_QUIET_EVAL, 1);
+ini_set('zend.assertions', DEBUG ? 1 : 0);
 
 $error_messages = array();
 
@@ -78,7 +76,7 @@ function msqur_assert_handler($file, $line, $code)
 {
     error("Assertion Failed: '$code'\nFile '$file', line '$line'");
 }
-assert_options(ASSERT_CALLBACK, 'msqur_assert_handler');
+set_exception_handler('msqur_assert_handler');
 
 if (!function_exists('array_key_first')) {
     function array_key_first(array $arr) {

@@ -4,4 +4,9 @@ define('DB_USERNAME', "XXX");
 define('DB_PASSWORD', "XXX");
 define('DB_NAME', "XXX");
 define('RUSEFI_ADMIN_USER_IDS', array(2,685));
+
+define('R2_ENDPOINT', "https://ACCOUNT_ID.r2.cloudflarestorage.com");
+define('R2_BUCKET', "rusefi-ini");
+define('R2_ACCESS_KEY_ID', "");
+define('R2_SECRET_ACCESS_KEY', "");
 ?>

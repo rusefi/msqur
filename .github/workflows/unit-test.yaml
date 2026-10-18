@@ -22,6 +22,8 @@ jobs:
         coverage: none
     - name: Check configuration startup and error reporting
       run: php tests/check_config.php
+    - name: Check INI parsing
+      run: php tests/check_ini.php
 
   unit-tests:
     runs-on: ubuntu-latest

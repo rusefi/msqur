@@ -438,7 +438,7 @@ class INI
 				case NULL:
 					//Should be global values (don't think any ini's have them)
 					assert($currentSection === NULL);
-					$globals[$key] = INI::defaultSectionHandler($value, $defines, $outputs, false);
+					$globals[$key] = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 				break;
 			}
 		}
@@ -452,7 +452,7 @@ class INI
 	 * @param $value
 	 * @returns An array if there's a comma, or just the value.
 	 */
-	private static function defaultSectionHandler($value, $defines, $outputs, $isLessStrict = false)
+	private static function defaultSectionHandler($value, $msq, $defines, $outputs, $isLessStrict = false)
 	{
 		if (strpos($value, '$') !== 0) {
 			$value = preg_replace_callback('/\$(\w+)/', function ($m) use($defines) {

@@ -2,12 +2,15 @@
 
 ## Project Structure & Module Organization
 
-MSQur is a PHP application for sharing and viewing ECU tunes and logs. `src/`
-contains request handlers and application classes: `msqur.php` coordinates actions,
+`src/` contains PHP request handlers and application classes: `msqur.php` coordinates actions,
 `db.php` handles persistence, and `ini.php`, `msq.php`, and `mlg.format.php` parse
 files. Templates, JavaScript, CSS, images, and bundled libraries live in
 `src/view/`; firmware definitions live in `src/ini/`. SQL schemas and migrations
 are in `db/`. Tests and fixtures are in `tests/` and `tests/testcases/`.
+
+Sibling repositories: `../web_backend` contains rusEFI web infrastructure;
+`../rusefi` contains firmware and tuning tools. Consult their contributor guidance
+when investigating integrations or changing shared interfaces.
 
 ## Build, Test, and Development Commands
 

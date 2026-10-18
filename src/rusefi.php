@@ -17,6 +17,7 @@ class Rusefi
 	public $username;
 	public $userid;
 	public $isAdminUser;
+	public $userTunes;
 	
 	public $forum_url = "https://rusefi.com/forum";
 	public $forum_login_url, $forum_user_profile_url;

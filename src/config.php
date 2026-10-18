@@ -18,7 +18,10 @@ ini_set('log_errors', '1');
 //MSQUR-1
 //date_default_timezone_set('UTC');
 
-ini_set('zend.assertions', DEBUG ? 1 : 0);
+// Assertions compiled out by php.ini cannot be enabled at runtime.
+if ((int) ini_get('zend.assertions') >= 0) {
+	ini_set('zend.assertions', DEBUG ? '1' : '0');
+}
 
 $error_messages = array();
 
@@ -71,12 +74,7 @@ function pageError($err) {
 	die;
 }
 
-//Setup assert() callback
-function msqur_assert_handler($file, $line, $code)
-{
-    error("Assertion Failed: '$code'\nFile '$file', line '$line'");
-}
-set_exception_handler('msqur_assert_handler');
+// Let PHP report uncaught AssertionError and other exceptions with their stack traces.
 
 if (!function_exists('array_key_first')) {
     function array_key_first(array $arr) {

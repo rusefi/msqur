@@ -19,9 +19,10 @@ ini_set('display_errors', DEBUG ? 'On' : 'Off');
 //MSQUR-1
 date_default_timezone_set('UTC');
 
-assert_options(ASSERT_ACTIVE, DEBUG ? 1 : 0);
-assert_options(ASSERT_WARNING, 0);
-assert_options(ASSERT_QUIET_EVAL, 1);
+// Assertions compiled out by php.ini cannot be enabled at runtime.
+if ((int) ini_get('zend.assertions') >= 0) {
+	ini_set('zend.assertions', DEBUG ? '1' : '0');
+}
 
 //Could move these to msqur class, but php
 function debuglog($type, $message)
@@ -45,10 +46,5 @@ function error($message)
 	debuglog("ERROR", $message);
 }
 
-//Setup assert() callback
-function msqur_assert_handler($file, $line, $code)
-{
-    error("Assertion Failed: '$code'\nFile '$file', line '$line'");
-}
-assert_options(ASSERT_CALLBACK, 'msqur_assert_handler');
+// Let PHP report uncaught AssertionError and other exceptions with their stack traces.
 ?>

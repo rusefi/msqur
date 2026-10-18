@@ -4,3 +4,6 @@ src/config_rusefi.php
 VERSION
 doxygen/*
 tests/.phpunit.result.cache 
+
+
+.idea

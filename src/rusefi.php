@@ -374,7 +374,7 @@ class Rusefi
 				return FALSE;
 			}
 			if ($id > 0) {
-				$err_msg = "ERROR! This file already exists in our Database! (id=$id)";
+				$err_msg = "This tune already exists in the database. <a href=\"view.php?msq=$id\">View tune #$id</a>.";
 				return FALSE;
 			}
 		}

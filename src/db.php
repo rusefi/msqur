@@ -946,7 +946,7 @@ class DB
 		try
 		{
 			//TODO transaction so we can rollback (`$db->beginTransaction()`)
-			$st = $this->db->prepare("SELECT id FROM msqur_files WHERE crc = :crc");
+			$st = $this->db->prepare("SELECT m.id, ".$this->UNCOMPRESS."(f.data) AS xml FROM msqur_files f INNER JOIN msqur_metadata m ON m.file = f.id WHERE f.crc = :crc");
 			$xml = file_get_contents($file['tmp_name']);
 			//Convert encoding to UTF-8
 			$xml = mb_convert_encoding($xml, "UTF-8");
@@ -964,14 +964,17 @@ class DB
 
 			DB::tryBind($st, ":crc", $crc16);
 			$st->execute();
-			$result = $st->fetch(PDO::FETCH_ASSOC);
-			if ($result && count($result) > 0)
-			{
-				$id = $result["id"];
-				$st->closeCursor();
-			} else {
-				$id = -1;
+			$id = -1;
+			// The 16-bit firmware CRC can collide and excludes auxiliary pages.
+			// Verify the stored XML before rejecting a file as a duplicate.
+			// addMSQ() stores XML with the same bibliography removal used above.
+			while ($result = $st->fetch(PDO::FETCH_ASSOC)) {
+				if ($result["xml"] === $xml) {
+					$id = $result["id"];
+					break;
+				}
 			}
+			$st->closeCursor();
 		}
 		catch (PDOException $e)
 		{

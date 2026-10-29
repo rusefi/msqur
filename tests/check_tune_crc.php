@@ -121,15 +121,50 @@ $db = $msqur->db;
 $db->db = new PDO('sqlite::memory:');
 $db->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->COMPRESS = '';
+$db->UNCOMPRESS = '';
 $db->db->exec('CREATE TABLE msqur_files (id INTEGER PRIMARY KEY AUTOINCREMENT, type INTEGER, crc INTEGER, data BLOB)');
 $db->db->exec('CREATE TABLE msqur_metadata (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, file INTEGER,
     engine INTEGER, fileFormat TEXT, signature TEXT, author TEXT, uploadDate TEXT, writeDate TEXT, tuneComment TEXT)');
 $file = array('name' => 'CurrentTune.msq', 'tmp_name' => __DIR__ . '/testcases/CurrentTune.msq');
 $message = '';
 checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($file), null, $message), true, 'New tune upload preflight');
+// A CRC match is only a candidate: unrelated tunes can share all 16 bits.
+$collision = $db->db->prepare('INSERT INTO msqur_files (id, type, crc, data) VALUES (984, 0, :crc, :xml)');
+$collision->execute(array(':crc' => $currentCrc, ':xml' => $legacyXml));
+$db->db->exec('INSERT INTO msqur_metadata (id, file) VALUES (1001, 984)');
+checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($file), null, $message), true, 'CRC collision is not a duplicate');
+
+// A failed earlier upload may leave a file row without a corresponding tune.
+$normalizedXml = trim(preg_replace('/<bibliography[^\/]*\/>/', '', mb_convert_encoding($currentXml, 'UTF-8')));
+$orphan = $db->db->prepare('INSERT INTO msqur_files (type, crc, data) VALUES (0, :crc, :xml)');
+$orphan->execute(array(':crc' => $currentCrc, ':xml' => $normalizedXml));
+checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($file), null, $message), true, 'Orphan file does not block an upload');
+
 $id = $db->addMSQ($file, null);
 checkTuneValue((int)$id > 0, true, 'Tune stored successfully');
-checkTuneValue((int)$db->db->query('SELECT crc FROM msqur_files')->fetchColumn(), $currentCrc, 'Stored CRC');
+$stored = $db->db->prepare('SELECT f.crc FROM msqur_files f INNER JOIN msqur_metadata m ON m.file = f.id WHERE m.id = :id');
+$stored->execute(array(':id' => $id));
+checkTuneValue((int)$stored->fetchColumn(), $currentCrc, 'Stored CRC');
+checkTuneValue((int)$db->findMSQ($file, null), (int)$id, 'Duplicate lookup returns the public tune ID');
 checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($file), null, $message), false, 'Duplicate tune rejected');
 checkTuneValue(strpos($message, 'already exists') !== false, true, 'Duplicate rejection reason');
+checkTuneValue(strpos($message, 'href="view.php?msq=' . $id . '"') !== false, true, 'Link to existing tune');
+
+$temporaryTune = tempnam(sys_get_temp_dir(), 'msqur-duplicate-');
+try {
+    $temporaryFile = array('name' => 'CurrentTune.msq', 'tmp_name' => $temporaryTune);
+    $resavedXml = preg_replace('/writeDate="[^"]*"/', 'writeDate="Fri Oct 30 18:12:15 CET 2026"', $currentXml);
+    file_put_contents($temporaryTune, $resavedXml);
+    checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($temporaryFile), null, $message), false,
+        'Changing only the bibliography remains a duplicate');
+
+    $luaXml = str_replace('<constant name="luaScript"/>', '<constant name="luaScript">print("changed")</constant>', $currentXml, $changed);
+    checkTuneValue($changed, 1, 'Lua fixture changed');
+    checkTuneValue($rusefi->calcCrcForTune($luaXml), $currentCrc, 'Auxiliary-page change shares the firmware CRC');
+    file_put_contents($temporaryTune, $luaXml);
+    checkTuneValue($rusefi->checkIfTuneCanBeUploaded(array($temporaryFile), null, $message), true,
+        'Different auxiliary-page contents can be uploaded');
+} finally {
+    unlink($temporaryTune);
+}
 echo "Tune CRC and upload regression checks passed\n";

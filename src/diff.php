@@ -22,7 +22,7 @@ global $i, $id, $msqs;
 if (isset($_GET['msq1']) && isset($_GET['msq2'])) {
 	$ids = array(intval($_GET['msq1']), intval($_GET['msq2']));
 	//$dialogId = parseQueryString('dialog');
-	$settings = explode("|", parseQueryString('settings'));
+	$settings = explode("|", parseQueryString('settings') ?? "");
 	$tParams = array();
 	$engines = array();
 	$isOwner = array();

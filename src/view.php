@@ -23,7 +23,7 @@ if (isset($_GET['msq'])) {
 	if (empty($viewMode))
 		$viewMode = "ts";
 	$dialogId = parseQueryString('dialog');
-	$settings = explode("|", parseQueryString('settings'));
+	$settings = explode("|", parseQueryString('settings') ?? "");
 	$html = $msqur->view($id, $viewMode, $settings);
 	$engine = $rusefi->getEngineFromTune($id);
 	if (count($engine) < 1)

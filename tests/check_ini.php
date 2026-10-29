@@ -32,6 +32,9 @@ pageSize = 16
 label = "Tune $LABEL"
 scale = { 1 / 100 }
 dependent = { base + 1 }
+scaled = scalar, U16, 0, {base ? "Fuel" : "Air"}, {base ? 0.01 : 0.147}, 0, -10, 10, 2
+scientific = scalar, U16, 2, "", 1.0E-5, 0, -10, 10, 5
+positiveExponent = scalar, U16, 4, "", 1.0E+3, 0, 0, 10000, 0
 [Menu]
 menu = "Fuel Settings"
 subMenu = fuelDialog, "Fuel Dialog"
@@ -54,6 +57,11 @@ INI
     checkIniValue($parsed['Constants']['label'], 'Tune Fuel', 'Section macro');
     checkIniValue($parsed['Constants']['scale'], '0.01', 'Constant expression');
     checkIniValue($parsed['Constants']['dependent'], '{ base + 1 }', 'Tune expression');
+    checkIniValue($parsed['Constants']['scaled'][3], '{base ? Fuel : Air}', 'Unsupported expression preserved');
+    checkIniValue($parsed['Constants']['scaled'][4], '{base ? 0.01 : 0.147}', 'Decimal tune expression');
+    checkIniValue($parsed['Constants']['scientific'][4], '1.0E-5', 'Negative scientific exponent');
+    checkIniValue($parsed['Constants']['scientific'][6], '-10', 'Negative bound');
+    checkIniValue($parsed['Constants']['positiveExponent'][4], '1.0E+3', 'Positive scientific exponent');
     checkIniValue($parsed['menu']['Fuel Settings']['menu'][0], 'Fuel Settings', 'Menu title');
     checkIniValue($parsed['menu']['Fuel Settings']['subMenu'][0], array('fuelDialog', 'Fuel Dialog'), 'Submenu');
     checkIniValue($parsed['outputs']['runtimeValue'], "return \$rusefi->getMsqConstant('base') + 1;", 'Output expression');

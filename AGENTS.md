@@ -9,8 +9,11 @@ files. Templates, JavaScript, CSS, images, and bundled libraries live in
 are in `db/`. Tests and fixtures are in `tests/` and `tests/testcases/`.
 
 Sibling repositories: `../web_backend` contains rusEFI web infrastructure;
-`../rusefi` contains firmware and tuning tools. Consult their contributor guidance
-when investigating integrations or changing shared interfaces.
+`../rusefi` contains rusEFI firmware and tuning tools. Use `../rusefi` as a
+reference when investigating firmware definitions, tune-file compatibility, or
+parser behavior. Read `../rusefi/AGENTS.md` before working in that repository, and
+consult each sibling's contributor guidance when investigating integrations or
+changing shared interfaces.
 
 ## Build, Test, and Development Commands
 
@@ -23,6 +26,8 @@ SimpleXML/XML, mbstring, and bcmath.
 - `(cd src && php -S 127.0.0.1:8000)`: serve the application locally.
 - `php tests/check_config.php`: check configuration startup and exception reporting.
 - `php tests/check_ini.php`: check parser behavior and exception compatibility.
+- `php tests/check_tune_crc.php`: check tune CRCs and upload/duplicate handling
+  using local fixtures and an in-memory SQLite database (requires PDO SQLite).
 - `(cd tests && bash run_tests.sh)`: run the legacy PHPUnit suite using PHP 7.3
   and its XML, mbstring, bcmath, and SQLite extensions, matching CI. The bundled
   PHPUnit executable is incompatible with PHP 8.

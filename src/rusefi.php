@@ -628,21 +628,16 @@ class Rusefi
 	{
 		if (!isset($msq->msqMap["Constants"]))
 			return 0;
-		$page = -1;
-		$pageData = array();
-		$i = 0;
+		// Engine::preCalculate() hashes persistent_config_s (INI page 1) only.
+		// pageSize is a scalar for old INIs and a list for multi-page INIs.
+		$pageSizes = (array)$msq->msqMap["Constants"]["pageSize"];
+		$pageData = array_fill(0, (int)$pageSizes[0], 0);
+		// INI expressions call $rusefi getters. Bind them to this tune locally.
+		$rusefi = clone $this;
+		$rusefi->msq = $msq;
 		foreach ($msq->msqMap["Constants"] as $consName=>$cons) {
-			if ($consName == "pageSize") {
-				$pageSize = $cons;
+			if (($msq->msqMap["constantPages"][$consName] ?? null) !== 1)
 				continue;
-			} else if ($consName == "page") {
-				$page = $cons;
-				$pageData[$page] = array_fill(0, $pageSize, 0);
-				continue;
-			}
-			if ($page < 0)
-				continue;
-			// now we process all page data
 			if (in_array($consName, $skipFields))
 				continue;
 
@@ -655,13 +650,23 @@ class Rusefi
 			if (preg_match("/[FSU]([0-9]+)/", $cons[1], $ret)) {
 				$numBytes = intval($ret[1]) / 8;
 			}
+			if ($cons[0] == "array" || $cons[0] == "scalar") {
+				$scale = $cons[$cons[0] == "array" ? 5 : 4];
+				if (strpos($scale, "{") === 0) {
+					$scale = eval(INI::parseExpression($scale, $msq->msq, array()));
+				}
+				// bcmath requires decimal strings, not scientific notation.
+				if (preg_match('/^([+-]?[0-9.]+)[eE]([+-]?[0-9]+)$/', (string)$scale, $ret)) {
+					$scale = bcmul($ret[1], bcpow("10", (int)$ret[2], 100), 100);
+				}
+			}
 
 			// write the value
 			if ($cons[0] == "bits") {
 				// read the existing value
 				$v = 0;
 				for ($i = 0; $i < $numBytes; $i++) {
-					$v |= intval($pageData[$page][$offset + $i]) << ($i * 8);
+					$v |= intval($pageData[$offset + $i]) << ($i * 8);
 				}
 				// apply the value as a bitmask
 				if (preg_match("/\[([0-9]+)\:([0-9]+)\]/", $cons[3], $ret)) {
@@ -680,10 +685,10 @@ class Rusefi
 						$numElements *= $ret[2];
 				}
 				// scale (we use bcdiv because we want a precise java-compliant float division)
-				$value = array_map(function($v) use ($cons) { return bcdiv($v, $cons[5], 100); }, $value);
+				$value = array_map(function($v) use ($scale) { return bcdiv($v, $scale, 100); }, $value);
 			} else if ($cons[0] == "scalar") {
 				// scale
-				$value = bcdiv($value, floatval($cons[4]), 100);
+				$value = bcdiv($value, $scale, 100);
 			} else if ($cons[0] == "string") {
 				$numBytes = $cons[3];
 			}
@@ -703,13 +708,12 @@ class Rusefi
 				$off = $offset + $i * $numBytes;
 				for ($j = 0; $j < $numBytes; $j++) {
 					// unpack() uses 1-based indices
-					$pageData[$page][$off + $j] = $v[$j + 1];
+					$pageData[$off + $j] = $v[$j + 1];
 				}
 			}
 		}
 		
-		// todo: how to process other pages?
-		$data = implode(array_map("chr", $pageData[array_key_first($pageData)]));
+		$data = implode(array_map("chr", $pageData));
 
         $crc32 = crc32($data);
         $crc16 = $crc32 & 0xFFFF;

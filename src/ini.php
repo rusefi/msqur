@@ -143,6 +143,7 @@ class INI
 		$tables = array();
 		$table = array();
 		$currentSection = NULL;
+		$constantPage = null;
 		$values = array();
 		$outputs = array();
 		$conditions = array();
@@ -208,6 +209,13 @@ class INI
 			{
 				case "Constants": //The start of our journey. Fill in details about variables.
 					$values[$currentSection][$key] = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
+					if ($key == "page") {
+						$constantPage = (int)$values[$currentSection][$key];
+					} else if ($constantPage !== null) {
+						// Repeated page declarations overwrite the flat Constants map.
+						// Keep each field's page separately without changing its definition.
+						$values["constantPages"][$key] = $constantPage;
+					}
 					break;
 				
 				case "SettingContextHelp": //Any help text for our variable
@@ -468,7 +476,7 @@ class INI
 		if (strpos($value, ',') !== FALSE || $isLessStrict) {
 			// a simple explode() by comma is not enough since we have expressions like "text,text"
 			$v = $value;
-			if (preg_match_all("/\"[^\"]*\"|[A-Za-z0-9_\.\[\]\:\$]+|{[^\}]+}/", $value, $ret))
+			if (preg_match_all("/\"[^\"]*\"|[A-Za-z0-9_\.\[\]\:\$+\-]+|{[^\}]+}/", $value, $ret))
 				$v = $ret[0];
 			if (count($v) == 1)
 				$v = $v[0];
@@ -482,7 +490,7 @@ class INI
 				$outFlags = array();
 				$newE = INI::parseExpression($e, $msq, $outputs, $outFlags);
 				// if not constant expr (requires external vars), then skip
-				if (count($outFlags) != 0)
+				if ($newE === NULL || count($outFlags) != 0)
 					continue;
 				// eval it now!
 				try
@@ -506,7 +514,7 @@ class INI
 	{
 		// we'll use eval() for these expressions, so we need to be extremely careful & paranoic here
 		$separators = "\-\+\!\/\?\:=><&|(),";
-		if (!preg_match ("/{([A-Za-z_0-9".$separators."\s]+)}/", $line, $ret)) {
+		if (!preg_match ("/{([A-Za-z_0-9".$separators."\.\s]+)}/", $line, $ret)) {
 			return NULL;
 		}
 

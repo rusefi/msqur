@@ -8,6 +8,25 @@ We create pull requests into upstream from dev branches.
 "prod" branch is what rusEFI uses in production. Any custom rusEfi code which we do not intend to push upstream
 should live in this branch.
 
+## Tests
+
+CI runs on PHP 8.3 and 8.4. Enable XML/DOM, mbstring, bcmath, PDO SQLite, and
+fileinfo, and install [PHPUnit 12.5](https://docs.phpunit.de/en/12.5/installation.html)
+as `phpunit` on `PATH`. The repository does not bundle a PHPUnit executable.
+
+```bash
+cp -n src/config_rusefi.php.sample src/config_rusefi.php
+php tests/check_config.php
+php tests/check_ini.php
+php tests/check_tune_crc.php
+bash tests/run_tests.sh
+```
+
+The PHPUnit suite uses an in-memory SQLite database and local fixtures. Its
+configuration allows 512 MB for the large log fixture and fails on warnings,
+deprecations, and risky tests. Additional PHPUnit options can be passed through
+the runner, for example `bash tests/run_tests.sh --filter UploadTest`.
+
 ## PHP upgrades
 
 `deploy.sh` excludes `config.php` (see `deploy_excludes.txt`), so deploying the code

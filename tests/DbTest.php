@@ -2,7 +2,7 @@
 
 require_once "common.php";
 
-class TestDb extends PHPUnit\Framework\TestCase
+class DbTest extends PHPUnit\Framework\TestCase
 {
     public function testTables()
     {

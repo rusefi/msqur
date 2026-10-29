@@ -2,12 +2,12 @@
 
 require_once "common.php";
 
-class TestMlg extends PHPUnit\Framework\TestCase
+class MlgTest extends PHPUnit\Framework\TestCase
 {
     public function testMlgParser() {
 		$data = file_get_contents("testcases/2020-06-30_19.21.53_mck1117_large.mlg");
 		$mlgParser = new MlgParser();
-		$mlgParser->initStats(true, false);
+		$mlgParser->initStats(false, false);
 		// parse
 		$ret = $mlgParser->parseBinary($data);
         $this->assertEquals("warn", $ret["status"]);
@@ -20,7 +20,7 @@ class TestMlg extends PHPUnit\Framework\TestCase
     public function testLogTuneCrc() {
 		$data = file_get_contents("testcases/log_2tunes_crc.mlg");
 		$mlgParser = new MlgParser();
-		$mlgParser->initStats(true, true);
+		$mlgParser->initStats(false, true);
 		// parse
 		$ret = $mlgParser->parseBinary($data);
         $this->assertEquals("ok", $ret["status"]);

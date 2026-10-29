@@ -2,11 +2,11 @@
 
 require_once "common.php";
 
-class TestUpload extends PHPUnit\Framework\TestCase
+class UploadTest extends PHPUnit\Framework\TestCase
 {
     public function testTuneUpload()
     {
-    	global $msqur, $rusefi, $test;
+		global $msqur, $rusefi, $test, $embResult;
 		$test = new CommonTestHelper();
 		$test->startTest();
 
@@ -29,12 +29,23 @@ class TestUpload extends PHPUnit\Framework\TestCase
         $rusefi->userid = 1;
 
 		// call the main code
-		include("../src/upload.php");
+		ob_start();
+		try {
+			include("../src/upload.php");
+		} finally {
+			$output = ob_get_clean();
+		}
+		$response = json_decode($output, true, 512, JSON_THROW_ON_ERROR);
+		$this->assertArrayNotHasKey("error", $response);
+		$this->assertArrayHasKey("info", $response);
 
 		// check if tables are filled with the data
 		$this->assertCount(1, $test->getTableFields("msqur_metadata", "id"));
 		$this->assertCount(1, $test->getTableFields("msqur_files", "id"));
 		$this->assertCount(1, $test->getTableFields("msqur_engines", "id"));
+		$metadata = $msqur->db->db->query("SELECT fileFormat, signature, firmware FROM msqur_metadata")->fetch(PDO::FETCH_ASSOC);
+		$this->assertSame(array("fileFormat" => "5.0", "signature" => "2020.07.06.mre_f4.2108843221", "firmware" => "rusEFI"), $metadata);
+		$this->assertNotEmpty($msqur->db->db->query("SELECT html FROM msqur_files")->fetchColumn());
 
 		// get the tune info
 		$tune = $msqur->browse(array(), 0, "msq");

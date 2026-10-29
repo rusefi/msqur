@@ -28,9 +28,9 @@ SimpleXML/XML, mbstring, and bcmath.
 - `php tests/check_ini.php`: check parser behavior and exception compatibility.
 - `php tests/check_tune_crc.php`: check tune CRCs and upload/duplicate handling
   using local fixtures and an in-memory SQLite database (requires PDO SQLite).
-- `(cd tests && bash run_tests.sh)`: run the legacy PHPUnit suite using PHP 7.3
-  and its XML, mbstring, bcmath, and SQLite extensions, matching CI. The bundled
-  PHPUnit executable is incompatible with PHP 8.
+- `bash tests/run_tests.sh`: run the PHPUnit suite using PHP 8.3 or 8.4 with
+  PHPUnit 12.5 on `PATH`, matching CI. Enable XML/DOM, mbstring, bcmath, PDO SQLite,
+  and fileinfo. See `README_rusefi.md` for setup.
 - `php -l src/ini.php`: check syntax; substitute each changed PHP file.
 
 ## Coding Style & Naming Conventions
@@ -43,10 +43,12 @@ CSSLint configurations exist; no PHP formatter is configured.
 
 ## Testing Guidelines
 
-Run relevant checks before submitting changes. Modern checks run on PHP 8.3 and
-8.4 in CI. PHPUnit tests use `test_*.php`, `Test*` classes, and `test*` methods;
-register new cases in `tests/phpunit.xml`. Add focused regression cases for parser
-and compatibility fixes. No coverage percentage is enforced.
+Run relevant checks before submitting changes. Standalone checks and the PHPUnit
+suite run on PHP 8.3 and 8.4 in CI. PHPUnit tests use `*Test.php` filenames with
+matching `*Test` classes and `test*` methods; `tests/phpunit.xml` discovers them
+automatically. Warnings, deprecations, and risky tests fail the suite. Add focused
+regression cases for parser and compatibility fixes. No coverage percentage is
+enforced.
 
 ## Commit & Pull Request Guidelines
 

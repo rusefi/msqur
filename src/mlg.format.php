@@ -132,7 +132,7 @@ class MlgParser {
 	private $mlgDataExtraField2 = "Cx";
 	private $mlgDataSizeExtra = 0x5;
 
-	private $stats;
+	private $state;
 	private $reqFields = NULL;
 
 	function detectFormat($data) {

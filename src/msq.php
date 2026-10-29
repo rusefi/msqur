@@ -157,8 +157,10 @@ EOT;
 				if (array_keys_exist($curve, 'desc', 'xBinConstant', 'yBinConstant', 'xMin', 'xMax', 'yMin', 'yMax'))
 				{
 					$digits = array(2, 2);
-					$xBins = $this->findConstant($msq, $curve['xBinConstant'], $digits, true);
-					$yBins = $this->findConstant($msq, $curve['yBinConstant'], $digits, true);
+					$xBins = $this->findConstant($msq, $curve['xBinConstant'], $digits[0], true);
+					$yBins = $this->findConstant($msq, $curve['yBinConstant'], $digits[1], true);
+					if ($xBins === NULL || $yBins === NULL)
+						continue;
 					$xAxis = preg_split("/\s+/", trim($xBins));
 					$yAxis = preg_split("/\s+/", trim($yBins));
 					$html["tabList"] .= $this->msqTable2D($curve, $curve['xMin'], $curve['xMax'], $xAxis, $curve['yMin'], $curve['yMax'], $yAxis, $help, false, $digits);

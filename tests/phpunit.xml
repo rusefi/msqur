@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit>
-<testsuite name='rusEFI'>
-      <file>test_db.php</file>
-      <file>test_mlg.php</file>
-      <file>test_upload.php</file>
-</testsuite>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+         cacheDirectory=".phpunit.cache"
+         failOnWarning="true"
+         failOnRisky="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true">
+    <testsuites>
+        <testsuite name="rusEFI">
+            <directory suffix="Test.php">.</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <!-- The large MLG fixture needs more than the CLI default of 128M. -->
+        <ini name="memory_limit" value="512M"/>
+    </php>
 </phpunit>

@@ -30,20 +30,21 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.3', '8.4']
 
     steps:
-    - uses: actions/checkout@v1
-
-    - name: Update and install PHP 7.3
-      run: |
-        sudo add-apt-repository ppa:ondrej/php
-        sudo apt-get update
-        sudo apt-get install php7.3 php7.3-xml php7.3-mbstring php7.3-bcmath php7.3-sqlite sqlite
-        sudo update-alternatives --set php /usr/bin/php7.3
+    - uses: actions/checkout@v4
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: dom, xml, xmlwriter, simplexml, mbstring, bcmath, pdo_sqlite, fileinfo
+        tools: phpunit:12.5
+        coverage: none
 
     - name: Copy Config
       run: cp ./src/config_rusefi.php.sample ./src/config_rusefi.php
 
     - name: Run Tests
-      working-directory: ./tests
-      run: bash run_tests.sh
+      run: bash tests/run_tests.sh

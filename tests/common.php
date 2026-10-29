@@ -1,5 +1,6 @@
 <?php
 
+global $msqur, $rusefi;
 require_once "../src/msqur.php";
 
 class CommonTestHelper

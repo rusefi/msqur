@@ -581,7 +581,7 @@ class DB
 		try
 		{
 			if (DEBUG) debug('Updating HTML cache...');
-			$st = $this->db->prepare("UPDATE msqur_files ms, msqur_metadata m SET ms.html=:html WHERE m.file = ms.id AND m.id = :id");
+			$st = $this->db->prepare("UPDATE msqur_files SET html = :html WHERE id = (SELECT file FROM msqur_metadata WHERE id = :id)");
 			//$xml = mb_convert_encoding($html, "UTF-8");
 			DB::tryBind($st, ":id", $id);
 			DB::tryBind($st, ":html", $html);
@@ -638,10 +638,10 @@ class DB
 			// nCylinders, twoStroke, injType, nInjectors, engineType
 			foreach ($engine as $k=>$e)
 			{
-				$setFields[] = "e." . $k . " = :" . $k;
+				$setFields[] = $k . " = :" . $k;
 			}
 
-			$st = $this->db->prepare("UPDATE msqur_engines e, msqur_metadata m SET " . implode(", ", $setFields) . " WHERE e.id = m.engine AND m.id = :id");
+			$st = $this->db->prepare("UPDATE msqur_engines SET " . implode(", ", $setFields) . " WHERE id = (SELECT engine FROM msqur_metadata WHERE id = :id)");
 			DB::tryBind($st, ":id", $id);
 
 			foreach ($engine as $k=>$e)
@@ -696,7 +696,7 @@ class DB
 		try
 		{
 			if (DEBUG) debug('Updating MSQ metadata...');
-			$st = $this->db->prepare("UPDATE msqur_metadata md SET md.fileFormat = :fileFormat, md.signature = :signature, md.firmware = :firmware WHERE md.id = :id");
+			$st = $this->db->prepare("UPDATE msqur_metadata SET fileFormat = :fileFormat, signature = :signature, firmware = :firmware WHERE id = :id");
 			//$xml = mb_convert_encoding($html, "UTF-8");
 			DB::tryBind($st, ":id", $id);
 			DB::tryBind($st, ":fileFormat", $metadata['fileFormat']);

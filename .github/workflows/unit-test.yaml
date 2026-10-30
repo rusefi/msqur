@@ -25,6 +25,8 @@ jobs:
       run: php tests/check_config.php
     - name: Check INI parsing
       run: php tests/check_ini.php
+    - name: Check tune dialog rendering
+      run: php tests/check_view.php
     - name: Check tune CRC and upload regression
       run: php tests/check_tune_crc.php
 

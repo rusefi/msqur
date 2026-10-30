@@ -18,6 +18,7 @@ as `phpunit` on `PATH`. The repository does not bundle a PHPUnit executable.
 cp -n src/config_rusefi.php.sample src/config_rusefi.php
 php tests/check_config.php
 php tests/check_ini.php
+php tests/check_view.php
 php tests/check_tune_crc.php
 bash tests/run_tests.sh
 ```

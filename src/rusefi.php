@@ -533,6 +533,12 @@ class Rusefi
 		if ($cc === NULL)
 			return NULL;
 		$value = trim($cc, " \r\n\"");
+		// Unsupported INI expressions can hide an array definition (e.g. VE load
+		// units). The saved MSQ still supplies its shape and display values.
+		if (!isset($msq->msqMap["Constants"][$c]) && isset($cc['rows'], $cc['cols'])) {
+			return array_map(function($v) { return floatval(str_replace(',', '', $v)); },
+				preg_split('/\s+/', $value, -1, PREG_SPLIT_NO_EMPTY));
+		}
 		// post-process the value
 		if (isset($msq->msqMap["Constants"][$c])) {
 			$cons = $msq->msqMap["Constants"][$c];

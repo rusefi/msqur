@@ -364,11 +364,11 @@ class Rusefi
 		return strcmp($v1, $v2) == 0;
 	}
 
-	public function checkIfTuneCanBeUploaded($files, $engineid, &$err_msg)
+	public function checkIfTuneCanBeUploaded($files, &$err_msg)
 	{
 		foreach ($files as $file)
 		{
-			$id = $this->msqur->db->findMSQ($file, $engineid);
+			$id = $this->msqur->db->findMSQ($file, $this->userid);
 			if ($id === FALSE) {
 				$err_msg = "Cannot upload this tune! The reasons are:<br>" . get_all_error_messages();
 				return FALSE;

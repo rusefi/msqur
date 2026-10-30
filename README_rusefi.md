@@ -30,8 +30,16 @@ the runner, for example `bash tests/run_tests.sh --filter UploadTest`.
 
 ## PHP upgrades
 
-`deploy.sh` excludes `config.php` (see `deploy_excludes.txt`), so deploying the code
-does not update the server's configuration. Apply the assertion configuration from
+`deploy.sh` excludes `config.php` and `config_rusefi.php` (see `deploy_excludes.txt`),
+so deploying the code does not update the server's configuration. Keep the server's
+database and R2 settings in `config_rusefi.php`; the sample is for local tests and
+has an empty `DB_HOST`. If Browse shows no tune or log tables and no makes or engine
+codes, check that the server's `config_rusefi.php` still contains its production
+database settings. An empty `DB_HOST` disables database access without reporting
+a connection error. Restore the original configuration from a server backup if it
+was overwritten by the sample; redeploying the code will not restore credentials.
+
+Apply the assertion configuration from
 `src/config.php` to the server's `online/config.php` separately, preserving local
 settings and credentials. Remove the old `assert_options(...)` calls, the
 `msqur_assert_handler` function, and any `set_exception_handler` registration for

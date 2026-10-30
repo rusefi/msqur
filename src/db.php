@@ -938,7 +938,7 @@ class DB
 		return -1;
 	}
 	
-	public function findMSQ($file, $engineid)
+	public function findMSQ($file, $user_id)
 	{
 		global $rusefi;
 		if (!$this->connect()) return FALSE;
@@ -946,7 +946,7 @@ class DB
 		try
 		{
 			//TODO transaction so we can rollback (`$db->beginTransaction()`)
-			$st = $this->db->prepare("SELECT m.id, ".$this->UNCOMPRESS."(f.data) AS xml FROM msqur_files f INNER JOIN msqur_metadata m ON m.file = f.id WHERE f.crc = :crc");
+			$st = $this->db->prepare("SELECT m.id, ".$this->UNCOMPRESS."(f.data) AS xml FROM msqur_files f INNER JOIN msqur_metadata m ON m.file = f.id INNER JOIN msqur_engines e ON m.engine = e.id WHERE f.crc = :crc AND e.user_id = :user_id");
 			$xml = file_get_contents($file['tmp_name']);
 			//Convert encoding to UTF-8
 			$xml = mb_convert_encoding($xml, "UTF-8");
@@ -963,6 +963,7 @@ class DB
 			if (DEBUG) debug("findMSQ: crc16=".$crc16);
 
 			DB::tryBind($st, ":crc", $crc16);
+			DB::tryBind($st, ":user_id", $user_id);
 			$st->execute();
 			$id = -1;
 			// The 16-bit firmware CRC can collide and excludes auxiliary pages.

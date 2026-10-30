@@ -199,7 +199,7 @@ if ($isEmbedded || (isset($_POST['upload']) && isset($_FILES)))
 			}
 		}
 	}
-	else if (!$rusefi->checkIfTuneCanBeUploaded($files, -1, $err_msg))
+	else if (!$rusefi->checkIfTuneCanBeUploaded($files, $err_msg))
 	{
 		addOutput('error', $err_msg);
 	}

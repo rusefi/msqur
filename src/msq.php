@@ -186,6 +186,8 @@ EOT;
 					$xBins = $this->findConstant($msq, $table['xBinConstant'], $digits[0], true);
 					$yBins = $this->findConstant($msq, $table['yBinConstant'], $digits[1], true);
 					$zBins = $this->findConstant($msq, $table['zBinConstant'], $digits[2], true);
+					if ($xBins === NULL || $yBins === NULL || $zBins === NULL)
+						continue;
 					$xAxis = preg_split("/\s+/", trim($xBins));
 					$yAxis = preg_split("/\s+/", trim($yBins));
 					$zData = preg_split("/\s+/", trim($zBins));//, PREG_SPLIT_NO_EMPTY); //, $limit);

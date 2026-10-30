@@ -310,6 +310,40 @@ if ($drawCurve) {
 	return $dlgTitle;
 }
 
+/**
+ * @brief Report curve/table constants the tune does not contain.
+ *
+ * Constants flagged noMsqSave (e.g. live long term fuel trims) are never saved,
+ * so their absence is expected and reported as such rather than as an error.
+ * @param $values Constant name => value, where NULL means not found.
+ * @returns TRUE when something was missing and a note was printed.
+ */
+function printCurveMissingData($msqMap, $curve, $values) {
+	$notStored = array();
+	$missing = array();
+	foreach ($values as $name => $value) {
+		if ($value !== NULL)
+			continue;
+		$cons = NULL;
+		if (isset($msqMap["Constants"][$name]))
+			$cons = $msqMap["Constants"][$name];
+		else if (isset($msqMap["PcVariables"][$name]))
+			$cons = $msqMap["PcVariables"][$name];
+		if (is_array($cons) && in_array("noMsqSave", $cons))
+			$notStored[] = $name;
+		else
+			$missing[] = $name;
+	}
+	if (empty($notStored) && empty($missing))
+		return FALSE;
+	$desc = htmlspecialchars($curve['desc']);
+	if (!empty($notStored))
+		echo "<div class='ts-label'>" . $desc . " is not stored in the tune file (" . htmlspecialchars(implode(', ', $notStored)) . ").</div>";
+	if (!empty($missing))
+		echo "<div class='error'>Missing data for " . $desc . ": " . htmlspecialchars(implode(', ', $missing)) . "</div>";
+	return TRUE;
+}
+
 function printCurve($i, $msqMap, $msq, $id, $curve) {
 	global $rusefi;
 
@@ -330,7 +364,8 @@ function printCurve($i, $msqMap, $msq, $id, $curve) {
 		$xAxis = $rusefi->getMsqConstantFull($curve['xBinConstant'], $msq, $digits[0]);
 		$yAxis = $rusefi->getMsqConstantFull($curve['yBinConstant'], $msq, $digits[1]);
 		$zData = $rusefi->getMsqConstantFull($curve['zBinConstant'], $msq, $digits[2]);
-		echo $msq->msqTable3D($curve, $xAxis, $yAxis, $zData, $help, true, $digits);
+		if (!printCurveMissingData($msqMap, $curve, array($curve['xBinConstant'] => $xAxis, $curve['yBinConstant'] => $yAxis, $curve['zBinConstant'] => $zData)))
+			echo $msq->msqTable3D($curve, $xAxis, $yAxis, $zData, $help, true, $digits);
 
 	}	
 	else if (array_keys_exist($curve, 'desc', 'xBinConstant', 'yBinConstant', 'xMin', 'xMax', 'yMin', 'yMax'))
@@ -338,7 +373,8 @@ function printCurve($i, $msqMap, $msq, $id, $curve) {
 		$digits = array(0, 0);
 		$xAxis = $rusefi->getMsqConstantFull($curve['xBinConstant'], $msq, $digits[0]);
 		$yAxis = $rusefi->getMsqConstantFull($curve['yBinConstant'], $msq, $digits[1]);
-		echo $msq->msqTable2D($curve, $curve['xMin'], $curve['xMax'], $xAxis, $curve['yMin'], $curve['yMax'], $yAxis, $help, true, $digits);
+		if (!printCurveMissingData($msqMap, $curve, array($curve['xBinConstant'] => $xAxis, $curve['yBinConstant'] => $yAxis)))
+			echo $msq->msqTable2D($curve, $curve['xMin'], $curve['xMax'], $xAxis, $curve['yMin'], $curve['yMax'], $yAxis, $help, true, $digits);
 	}
 
 	echo "</div><script>$('div#".$tabId."').accordion(accordionOptions);

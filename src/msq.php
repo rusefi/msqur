@@ -250,6 +250,11 @@ EOT;
 	public function findConstant($xml, $constant, &$digits, $format = true)
 	{
 		$search = $xml->xpath('//constant[@name="' . $constant . '"]');
+		if ($search === FALSE || count($search) == 0)
+		{
+			// PcVariables (e.g. table axes such as gearCountArray) are saved as pcVariable elements
+			$search = $xml->xpath('//pcVariable[@name="' . $constant . '"]');
+		}
 		if ($search === FALSE || count($search) == 0) return NULL;
 		if (!isset($search[0]["digits"])) {
 			// todo: what number is better?
@@ -383,7 +388,7 @@ EOT;
 			$output .= "<tr><th>" . $yAxis[$r] . "</th>";
 			for ($c = 0; $c < $cols; $c++)
 			{
-				$output .= "<td digits='".$digits[2]."'>" . $zBins[$r * $rows + $c] . "</td>";
+				$output .= "<td digits='".$digits[2]."'>" . $zBins[$r * $cols + $c] . "</td>";
 			}
 		}
 		

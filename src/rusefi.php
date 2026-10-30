@@ -531,7 +531,7 @@ class Rusefi
 	{
 		$cc = $msq->findConstant($msq->msq, $c, $digits, false);
 		if ($cc === NULL)
-			return NULL;
+			return $this->getPcVariableDefault($c, $msq, $digits);
 		$value = trim($cc, " \r\n\"");
 		// Unsupported INI expressions can hide an array definition (e.g. VE load
 		// units). The saved MSQ still supplies its shape and display values.
@@ -572,6 +572,45 @@ class Rusefi
 			if (count($value) == 1)
 				return $value[0];
 		}
+		return $value;
+	}
+
+	/**
+	 * @brief Value of a PcVariable that the tune does not store.
+	 *
+	 * TunerStudio keeps PcVariables on the PC side and falls back to the INI
+	 * [ConstantsExtensions] defaultValue, trimmed to the declared array size.
+	 * @returns An array of floats, a scalar, or NULL when there is no default.
+	 */
+	private function getPcVariableDefault($c, $msq, &$digits)
+	{
+		if (!isset($msq->msqMap["PcVariables"][$c], $msq->msqMap["ConstantsExtensions"]["defaultValue"][$c]))
+			return NULL;
+		$cons = $msq->msqMap["PcVariables"][$c];
+		$default = trim($msq->msqMap["ConstantsExtensions"]["defaultValue"][$c], " \r\n\"");
+		if (!is_array($cons) || $cons[0] != "array") {
+			if (is_array($cons) && $cons[0] == "scalar" && isset($cons[7]) && is_numeric($cons[7]))
+				$digits = intval($cons[7]);
+			return is_numeric($default) ? floatval($default) : $default;
+		}
+		// The shape token may be split by whitespace (e.g. "[ 16]"), so find its end.
+		$size = 0;
+		$shapeIdx = 2;
+		$def = implode(' ', $cons);
+		if (preg_match('/\[\s*(\d+)\s*(?:x\s*(\d+))?\s*\]/', $def, $m)) {
+			$size = intval($m[1]) * (isset($m[2]) ? intval($m[2]) : 1);
+			foreach ($cons as $i => $token) {
+				if (strpos($token, ']') !== FALSE) {
+					$shapeIdx = $i;
+					break;
+				}
+			}
+		}
+		if (isset($cons[$shapeIdx + 6]) && is_numeric($cons[$shapeIdx + 6]))
+			$digits = intval($cons[$shapeIdx + 6]);
+		$value = array_map('floatval', preg_split('/\s+/', $default, -1, PREG_SPLIT_NO_EMPTY));
+		if ($size > 0 && count($value) > $size)
+			$value = array_slice($value, 0, $size);
 		return $value;
 	}
 

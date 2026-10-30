@@ -428,11 +428,20 @@ class INI
 				case "PcVariables":
 					$values[$currentSection][$key] = INI::defaultSectionHandler($value, $msq, $defines, $outputs, false);
 					break;
+				case "ConstantsExtensions": //misc reset required fields
+					// defaultValue = name, value(s): TunerStudio uses it for PcVariables that
+					// are not saved in the tune, so table axes can be drawn without them.
+					if ($key == "defaultValue")
+					{
+						$default = array_map('trim', explode(',', $value, 2));
+						if (count($default) == 2 && $default[0] !== '')
+							$values[$currentSection][$key][$default[0]] = $default[1];
+					}
+					break;
 				//Don't care about these
 				case "Datalog": //Not relevant
 				case "MegaTune":
 				case "ReferenceTables": //misc MAF stuff
-				case "ConstantsExtensions": //misc reset required fields
 				case "PortEditor": //not sure
 				case "GaugeConfigurations": //Not relevant
 				case "FrontPage": //Not relevant
